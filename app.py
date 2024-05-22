@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 import asyncio
 from prisma import Prisma
 from comentario import create_comment, get_comments_for_product
+from calificacion import create_rating, get_ratings_for_product
 
 # import os
 # from supabase import create_client, Client
@@ -122,7 +123,21 @@ def add_comment():
         'product_id': comment.product_id
     })
 
+# Calificaciones
+@app.route('/product/<int:product_id>/ratings', methods=['GET'])
+def get_ratings(product_id):
+    ratings = loop.run_until_complete(get_ratings_for_product(prisma, product_id))
+    return jsonify({'ratings': ratings})
 
+@app.route('/rating', methods=['POST'])
+def add_rating():
+    data = request.get_json()
+    rating = loop.run_until_complete(create_rating(prisma, data))
+    return jsonify({
+        'id': rating.id,
+        'value': rating.value,
+        'product_id': rating.product_id
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)

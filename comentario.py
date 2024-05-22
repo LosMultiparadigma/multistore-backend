@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request, send_from_directory
 import asyncio
 from prisma import Prisma
 
-# En el archivo comment_operations.py
 async def create_comment(prisma, data):
     await prisma.connect()
     comment = await prisma.comment.create(
