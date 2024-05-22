@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 import asyncio
 from prisma import Prisma
+from comentario import create_comment, get_comments_for_product
 
 # import os
 # from supabase import create_client, Client
@@ -103,6 +104,22 @@ def get_product(id):
         'description': product.description,
         'price': product.price,
         'user_id': product.user_id
+    })
+
+# Comentarios
+@app.route('/product/<int:product_id>/comments', methods=['GET'])
+def get_comments(product_id):
+    comments = loop.run_until_complete(get_comments_for_product(prisma, product_id))
+    return jsonify({'comments': comments})
+
+@app.route('/comment', methods=['POST'])
+def add_comment():
+    data = request.get_json()
+    comment = loop.run_until_complete(create_comment(prisma, data))
+    return jsonify({
+        'id': comment.id,
+        'text': comment.text,
+        'product_id': comment.product_id
     })
 
 
