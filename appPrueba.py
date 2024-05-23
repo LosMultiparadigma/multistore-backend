@@ -89,6 +89,24 @@ async def delete_product(product_id):
     await prisma.disconnect()
     return {'message': 'Product deleted successfully'}
 
+# Order-related functions
+async def create_order(data):
+    await prisma.connect()
+    order = await prisma.order.create(
+        data={
+            'total': data['total'],
+            'userId': data['user_id']
+        }
+    )
+    await prisma.disconnect()
+    return order
+
+async def get_orders():
+    await prisma.connect()
+    orders = await prisma.order.find_many()
+    await prisma.disconnect()
+    return [order.model_dump() for order in orders]
+
 # Routes
 @app.route('/users', methods=['GET'])
 def index():
@@ -169,6 +187,26 @@ def update_product_route(product_id):
 def delete_product_route(product_id):
     result = loop.run_until_complete(delete_product(product_id))
     return jsonify(result)
+
+# Order routes
+@app.route('/order', methods=['POST'])
+def add_order():
+    data = request.get_json()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    order = loop.run_until_complete(create_order(data))
+    return jsonify({
+        'id': order.id,
+        'total': order.total,
+        'user_id': order.user_id
+    })
+
+@app.route('/orders', methods=['GET'])
+def list_orders():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    orders = loop.run_until_complete(get_orders())
+    return jsonify({'orders': orders})
 
 
 if __name__ == '__main__':
