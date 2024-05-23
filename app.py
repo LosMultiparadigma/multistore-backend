@@ -62,6 +62,10 @@ async def get_users():
     return [user.model_dump() for user in users]  # Convert each user to a dictionary
 
 
+@app.route('/register', methods=['POST'])
+
+
+
 @app.route('/users', methods=['GET'])
 def index():
     users = loop.run_until_complete(get_users())
